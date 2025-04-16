@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
+          .\venv\Scripts\Activate.ps1
+          pip install .
+
+      - name: Package code and venv
+        run: |
+          .\venv\Scripts\Activate.ps1
+          Compress-Archive -Path .\* -DestinationPath 'manga-text-detection_${{ github.ref_name }}_windows.zip' -CompressionLevel Optimal
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            manga-text-detection_${{ github.ref_name }}_windows.zip
