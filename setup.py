@@ -8,7 +8,7 @@ setup(
     install_requires=[
         "pywin32",
         "opencv-python",
-        "torch",
+        "torch<2.6.0",  # https://dev-discuss.pytorch.org/t/bc-breaking-change-torch-load-is-being-flipped-to-use-weights-only-true-by-default-in-the-nightlies-after-137602/2573
         "torchvision",
         "numpy",
         "pyclipper",
