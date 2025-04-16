@@ -18,21 +18,30 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.11"
+          python-version: "3.11.9"
 
-      - name: Create virtual environment
+      - name: Download embeddable Python
         run: |
-          python -m venv --copies venv
-          .\venv\Scripts\Activate.ps1
+          $url = "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip"
+          $output = "$env:TEMP/python-embed.zip"
+          Invoke-WebRequest -Uri $url -OutFile $output
+          Expand-Archive -Path $output -DestinationPath ./python -Force
+          Remove-Item $output
+
+      - name: Install dependencies
+        run: |
           pip install .
+          $pythonPath = (Get-Command python | Select-Object -First 1).Source
+          $packagePath = "$pythonPath\..\Lib\site-packages"
+          Copy-Item -Path $packagePath -Destination python\site-packages -Recurse
+          Add-Content -Path python\python311._pth -Value "`nsite-packages"
 
-      - name: Package code and venv
+      - name: Compress files
         run: |
-          .\venv\Scripts\Activate.ps1
-          Compress-Archive -Path . -DestinationPath 'manga-text-detection_${{ github.ref_name }}_windows.zip' -CompressionLevel Optimal
+          Compress-Archive -Path . -DestinationPath manga-text-detection_${{ github.ref_name }}_windows_amd64.zip -CompressionLevel Optimal
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            manga-text-detection_${{ github.ref_name }}_windows.zip
+            manga-text-detection_${{ github.ref_name }}_windows_amd64.zip
