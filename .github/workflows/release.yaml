@@ -13,7 +13,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -35,6 +37,8 @@ jobs:
           $packagePath = "$pythonPath\..\Lib\site-packages"
           Copy-Item -Path $packagePath -Destination python\site-packages -Recurse
           Add-Content -Path python\python311._pth -Value "`nsite-packages"
+          Add-Content -Path python\python311._pth -Value "site-packages/win32"
+          Add-Content -Path python\python311._pth -Value "site-packages/win32/lib"
 
       - name: Compress files
         run: |
